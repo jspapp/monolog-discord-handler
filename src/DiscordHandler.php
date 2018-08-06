@@ -31,7 +31,9 @@ class DiscordHandler extends AbstractProcessingHandler
 	{
 		foreach ($this->webhooks as $url) {
 			$this->client->request('POST', $url, [
-				'content' => $record['formatted'],
+				'json' => [
+					'content' => $record['formatted'],
+				],
 			]);
 		}
 	}
