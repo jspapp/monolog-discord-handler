@@ -1,0 +1,21 @@
+{
+	"name": "jpapp/monolog-discord-handler",
+	"description": "A Monolog handler for Discord",
+	"type": "library",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Jason Papp",
+			"email": "jspapp@gmail.com"
+		}
+	],
+	"autoload": {
+		"psr-4": {
+			"jpapp\\DiscordHandler\\": "src"
+		}
+	},
+	"require": {
+		"monolog/monolog": "^1.23",
+		"guzzlehttp/guzzle": "^6.3"
+	}
+}
