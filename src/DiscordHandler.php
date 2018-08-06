@@ -1,6 +1,6 @@
 <?php
 
-namespace jpapp\DiscordHandler;
+namespace jspapp\DiscordHandler;
 
 use GuzzleHttp\Client;
 use Monolog\Handler\AbstractProcessingHandler;

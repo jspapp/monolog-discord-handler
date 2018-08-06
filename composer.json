@@ -1,5 +1,5 @@
 {
-	"name": "jpapp/monolog-discord-handler",
+	"name": "jspapp/monolog-discord-handler",
 	"description": "A Monolog handler for Discord",
 	"type": "library",
 	"license": "MIT",
@@ -11,7 +11,7 @@
 	],
 	"autoload": {
 		"psr-4": {
-			"jpapp\\DiscordHandler\\": "src"
+			"jspapp\\DiscordHandler\\": "src"
 		}
 	},
 	"require": {
