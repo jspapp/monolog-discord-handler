@@ -24,13 +24,13 @@ class DiscordHandler extends AbstractProcessingHandler
 	 * Number of requests remaining within the rate limit.
 	 * @var int
 	 */
-	private $rateLimitRemaining;
+	private static $rateLimitRemaining;
 
 	/**
 	 * Epoch time at which the rate limit resets.
 	 * @var int
 	 */
-	private $rateLimitReset;
+	private static $rateLimitReset;
 
 	public function __construct($webhook, $level = Logger::ERROR, bool $bubble = true)
 	{
@@ -42,8 +42,8 @@ class DiscordHandler extends AbstractProcessingHandler
 
 	protected function write(array $record)
 	{
-		if ($this->rateLimitRemaining == 0 && $this->rateLimitReset !== null) {
-			$this->waitUntil($this->rateLimitReset);
+		if (self::$rateLimitRemaining == 0 && self::$rateLimitReset !== null) {
+			$this->waitUntil(self::$rateLimitReset);
 		}
 
 		$response = $this->client->request('POST', $this->webhook, [
@@ -53,11 +53,11 @@ class DiscordHandler extends AbstractProcessingHandler
 			],
 		]);
 
-		$this->rateLimitRemaining = $response->getHeader('X-RateLimit-Remaining')[0];
-		$this->rateLimitReset = $response->getHeader('X-RateLimit-Reset')[0];
+		self::$rateLimitRemaining = $response->getHeader('X-RateLimit-Remaining')[0];
+		self::$rateLimitReset = $response->getHeader('X-RateLimit-Reset')[0];
 
-		print_r($this->rateLimitRemaining.PHP_EOL);
-		print_r($this->rateLimitReset.PHP_EOL);
+		print_r(self::$rateLimitRemaining.PHP_EOL);
+		print_r(self::$rateLimitReset.PHP_EOL);
 	}
 
 	private function formatEmbeds(array $record)
