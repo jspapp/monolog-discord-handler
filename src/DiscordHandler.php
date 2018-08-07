@@ -4,6 +4,7 @@ namespace jspapp\DiscordHandler;
 
 use GuzzleHttp\Client;
 use Monolog\Handler\AbstractProcessingHandler;
+use Monolog\Logger;
 
 class DiscordHandler extends AbstractProcessingHandler
 {
@@ -29,10 +30,16 @@ class DiscordHandler extends AbstractProcessingHandler
 
 	protected function write(array $record)
 	{
+		$embeds = array();
+		foreach ($record['context'] as $key => $value) {
+			$embeds[] = ['title' => $key, 'description' => $value,];
+		}
+
 		foreach ($this->webhooks as $url) {
 			$this->client->request('POST', $url, [
 				'json' => [
-					'content' => $record['formatted'],
+					'content' => $record['message'],
+					'embeds' => $embeds,
 				],
 			]);
 		}
