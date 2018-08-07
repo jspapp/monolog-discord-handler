@@ -9,10 +9,10 @@ use Monolog\Logger;
 class DiscordHandler extends AbstractProcessingHandler
 {
 	/**
-	 * List of Discord webhooks to post to.
-	 * @var Array
+	 * Discord webhook to post to.
+	 * @var string
 	 */
-	private $webhooks;
+	private $webhook;
 
 	/**
 	 * Http client to connect to Discord.
@@ -20,9 +20,9 @@ class DiscordHandler extends AbstractProcessingHandler
 	 */
 	private $client;
 
-	public function __construct($webhooks, $level = Logger::ERROR, bool $bubble = true)
+	public function __construct($webhook, $level = Logger::ERROR, bool $bubble = true)
 	{
-		$this->webhooks = $webhooks;
+		$this->webhook = $webhook;
 		$this->client = new Client();
 
 		parent::__construct($level, $bubble);
@@ -30,18 +30,28 @@ class DiscordHandler extends AbstractProcessingHandler
 
 	protected function write(array $record)
 	{
+		$this->client->request('POST', $this->webhook, [
+			'json' => [
+				'content' => $record['message'],
+				'embeds' => $this->formatEmbeds($record),
+			],
+		]);
+	}
+
+	private function formatEmbeds(array $record)
+	{
 		$embeds = array();
 		foreach ($record['context'] as $key => $value) {
-			$embeds[] = ['title' => $key, 'description' => $value,];
+			if (is_object($value) || is_array($value)) {
+				$value = json_encode($value);
+			}
+
+			$embeds[] = [
+				'title' => $key,
+				'description' => $value,
+			];
 		}
 
-		foreach ($this->webhooks as $url) {
-			$this->client->request('POST', $url, [
-				'json' => [
-					'content' => $record['message'],
-					'embeds' => $embeds,
-				],
-			]);
-		}
+		return $embeds;
 	}
 }
