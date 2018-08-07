@@ -3,6 +3,7 @@
 namespace jspapp\DiscordHandler;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\Logger;
 
@@ -46,18 +47,30 @@ class DiscordHandler extends AbstractProcessingHandler
 			$this->waitUntil(self::$rateLimitReset);
 		}
 
-		$response = $this->client->request('POST', $this->webhook, [
-			'json' => [
-				'content' => $record['message'],
-				'embeds' => $this->formatEmbeds($record),
-			],
-		]);
+		try {
+			$response = $this->send($record);
+		} catch (ClientException $ex) {
+			$response = $ex->getResponse();
+			$retryAfter = $response->getHeader('Retry-After')[0];
+
+			sleep($retryAfter);
+			$this->send($record);
+		}
 
 		self::$rateLimitRemaining = $response->getHeader('X-RateLimit-Remaining')[0];
 		self::$rateLimitReset = $response->getHeader('X-RateLimit-Reset')[0];
 
 		print_r(self::$rateLimitRemaining.PHP_EOL);
 		print_r(self::$rateLimitReset.PHP_EOL);
+	}
+
+	private function send(array $record) {
+		return $this->client->request('POST', $this->webhook, [
+			'json' => [
+				'content' => $record['message'],
+				'embeds' => $this->formatEmbeds($record),
+			],
+		]);
 	}
 
 	private function formatEmbeds(array $record)
