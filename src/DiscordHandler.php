@@ -51,10 +51,12 @@ class DiscordHandler extends AbstractProcessingHandler
 			$response = $this->send($record);
 		} catch (ClientException $ex) {
 			$response = $ex->getResponse();
-			$retryAfter = $response->getHeader('Retry-After')[0];
+			if ($response->getStatusCode() == 429) {
+				$retryAfter = $response->getHeader('Retry-After')[0];
+				$this->wait($retryAfter);
 
-			usleep($retryAfter);
-			$this->send($record);
+				$this->send($record);
+			}
 		}
 
 		$this->rateLimitRemaining = $response->getHeader('X-RateLimit-Remaining')[0];
@@ -74,8 +76,10 @@ class DiscordHandler extends AbstractProcessingHandler
 	{
 		$embeds = array();
 		foreach ($record['context'] as $key => $value) {
-			if (is_object($value) || is_array($value)) {
+			if (is_array($value)) {
 				$value = json_encode($value);
+			} else if (method_exists($value, '__toString')) {
+				$value = (string)$value;
 			}
 
 			$embeds[] = [
@@ -85,6 +89,11 @@ class DiscordHandler extends AbstractProcessingHandler
 		}
 
 		return $embeds;
+	}
+
+	private function wait($microseconds)
+	{
+		usleep($microseconds);
 	}
 
 	private function waitUntil($timestamp)
