@@ -20,6 +20,18 @@ class DiscordHandler extends AbstractProcessingHandler
 	 */
 	private $client;
 
+	/**
+	 * Number of requests remaining within the rate limit.
+	 * @var int
+	 */
+	private $rateLimitRemaining;
+
+	/**
+	 * Epoch time at which the rate limit resets.
+	 * @var int
+	 */
+	private $rateLimitReset;
+
 	public function __construct($webhook, $level = Logger::ERROR, bool $bubble = true)
 	{
 		$this->webhook = $webhook;
@@ -30,12 +42,22 @@ class DiscordHandler extends AbstractProcessingHandler
 
 	protected function write(array $record)
 	{
-		$this->client->request('POST', $this->webhook, [
+		if ($this->rateLimitRemaining == 0 && $this->rateLimitReset !== null) {
+			$this->waitUntil($this->rateLimitReset);
+		}
+
+		$response = $this->client->request('POST', $this->webhook, [
 			'json' => [
 				'content' => $record['message'],
 				'embeds' => $this->formatEmbeds($record),
 			],
 		]);
+
+		$this->rateLimitRemaining = $response->getHeader('X-RateLimit-Remaining')[0];
+		$this->rateLimitReset = $response->getHeader('X-RateLimit-Reset')[0];
+
+		print_r($this->rateLimitRemaining.PHP_EOL);
+		print_r($this->rateLimitReset.PHP_EOL);
 	}
 
 	private function formatEmbeds(array $record)
@@ -53,5 +75,10 @@ class DiscordHandler extends AbstractProcessingHandler
 		}
 
 		return $embeds;
+	}
+
+	private function waitUntil($timestamp)
+	{
+		time_sleep_until($timestamp);
 	}
 }

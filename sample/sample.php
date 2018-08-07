@@ -1,12 +1,10 @@
 <?php
 
-use jspapp\DiscordHandler\DiscordHandler;
+require __DIR__.'/../vendor/autoload.php';
 
-require '../vendor/autoload.php';
-
-$webhook = 'https://discordapp.com/api/webhooks/xxxxxxxxxxxxxxxxxx/yyyyyyyyyyyyyyyyyyyyyy';
+$webhook = '';
 
 $logger = new Monolog\Logger('local');
-$logger->pushHandler(new DiscordHandler($webhook));
+$logger->pushHandler(new jspapp\DiscordHandler\DiscordHandler($webhook));
 
-$logger->error('User created.', ['user_id' => 1, 'ip' => '127.0.0.1']);
+$logger->error('User created.', ['Name' => 'Test User', 'Id' => 1]);
