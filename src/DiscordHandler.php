@@ -53,7 +53,7 @@ class DiscordHandler extends AbstractProcessingHandler
 			$response = $ex->getResponse();
 			$retryAfter = $response->getHeader('Retry-After')[0];
 
-			sleep($retryAfter);
+			usleep($retryAfter);
 			$this->send($record);
 		}
 
