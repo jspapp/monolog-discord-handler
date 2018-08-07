@@ -66,7 +66,7 @@ class DiscordHandler extends AbstractProcessingHandler
 	private function send(array $record) {
 		return $this->client->request('POST', $this->webhook, [
 			'json' => [
-				'content' => $record['message'],
+				'content' => '['.$record['datetime']->format('Y-m-d h:i:s a').'] '.$record['message'],
 				'embeds' => $this->formatEmbeds($record),
 			],
 		]);
