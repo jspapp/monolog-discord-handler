@@ -20,7 +20,7 @@ class DiscordHandler extends AbstractProcessingHandler
 	 */
 	private $client;
 
-	public function __construct($webhooks, $level = Logger::DEBUG, bool $bubble = true)
+	public function __construct($webhooks, $level = Logger::ERROR, bool $bubble = true)
 	{
 		$this->webhooks = $webhooks;
 		$this->client = new Client();
