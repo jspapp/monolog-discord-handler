@@ -33,6 +33,15 @@ class DiscordHandler extends AbstractProcessingHandler
 	 */
 	private $rateLimitReset;
 
+	// private const DEBUG_COLOR = ;
+	// private const INFO_COLOR = ;
+	// private const NOTICE_COLOR = ;
+	// private const WARNING_COLOR = ;
+	// private const ERROR_COLOR = ;
+	// private const CRITICAL_COLOR = ;
+	// private const ALERT_COLOR = '#cccc00';
+	// private const EMERGENCY_COLOR = '#aa0000';
+
 	public function __construct($webhook, $level = Logger::ERROR, bool $bubble = true)
 	{
 		$this->webhook = $webhook;
@@ -56,6 +65,8 @@ class DiscordHandler extends AbstractProcessingHandler
 				$this->wait($retryAfter);
 
 				$this->send($record);
+			} else {
+				throw $ex;
 			}
 		}
 
@@ -64,17 +75,24 @@ class DiscordHandler extends AbstractProcessingHandler
 	}
 
 	private function send(array $record) {
+		$formattedDate = $record['datetime']
+			->setTimezone(new \DateTimeZone(date_default_timezone_get()))
+			->format('Y-m-d h:i:s A');
+
 		return $this->client->request('POST', $this->webhook, [
-			'json' => [
-				'content' => '['.$record['datetime']->format('Y-m-d h:i:s a').'] '.$record['message'],
-				'embeds' => $this->formatEmbeds($record),
-			],
+			'json' => $this->formatMessage($record),
 		]);
 	}
 
+	private function formatMessage(array $record) {
+		return [
+			'embeds' => $this->formatEmbeds($record),
+		];
+	}
+
 	private function formatEmbeds(array $record)
-	{
-		$embeds = array();
+	{		
+		$fields = array();
 		foreach ($record['context'] as $key => $value) {
 			if (is_array($value)) {
 				$value = json_encode($value);
@@ -82,13 +100,23 @@ class DiscordHandler extends AbstractProcessingHandler
 				$value = (string)$value;
 			}
 
-			$embeds[] = [
-				'title' => $key,
-				'description' => $value,
+			$fields[] = [
+				'name' => $key,
+				'value' => $value,
+				'inline' => true,
 			];
 		}
 
-		return $embeds;
+		return [
+			[
+				'title' => $record['message'],
+				'timestamp' => $record['datetime']->format(\DateTime::ATOM),
+				'fields' => $fields,
+				'footer' => [
+					'text' => $record['channel'].'.'.$record['level_name'],
+				],
+			]
+		];
 	}
 
 	private function wait($microseconds)
