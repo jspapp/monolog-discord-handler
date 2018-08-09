@@ -1,6 +1,6 @@
 <?php
 
-namespace jspapp\DiscordHandler;
+namespace jspapp\MonologDiscord;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
