@@ -13,7 +13,7 @@ use jspapp\MonologDiscord\DiscordHandler;
 
 $webhook = 'Your Webhook URL';
 
-$log = new Monolog\ogger('discord');
+$log = new Monolog\Logger('discord');
 $log->pushHandler(new DiscordHandler($webhook, Logger::INFO));
 
 $log->info('This is the title!', [
