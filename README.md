@@ -42,6 +42,6 @@ and add the following driver configuration:
 ### Rate Limit Note
 I did what I could to respect Discord's rate limit, but adding the driver to Laravel's default log stack gave me issues. Use with caution in production environments, and consider selectively using:
 ```php
-Log::driver('discord')->info('Message')
+Log::channel('discord')->info('Message');
 ```
 instead of catching everything.
