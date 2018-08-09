@@ -2,9 +2,17 @@
 
 require __DIR__.'/../vendor/autoload.php';
 
+use Monolog\Logger;
+use jspapp\MonologDiscord\DiscordHandler;
+use jspapp\MonologDiscord\Laravel\DiscordChannel;
+
 $webhook = '';
 
-$logger = new Monolog\Logger('local');
-$logger->pushHandler(new jspapp\DiscordHandler\DiscordHandler($webhook));
+$log = new Logger('discord');
+$log->pushHandler(new DiscordHandler($webhook));
 
-$logger->error('User created.', ['Name' => 'Test User', 'Id' => 1]);
+$log->error('User created.', [
+	'user_id' => 1,
+	'email' => 'test@example.com',
+	'address' => '123 Home St.',
+]);
