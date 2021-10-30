@@ -102,14 +102,14 @@ class DiscordHandler extends AbstractProcessingHandler
 
 			$fields[] = [
 				'name' => $key,
-				'value' => $value,
+				'value' => \mb_substr($value, 0, 1024),
 				'inline' => true,
 			];
 		}
 
 		return [
 			[
-				'title' => $record['message'],
+				'title' => \mb_substr($record['message'], 0, 256),
 				'timestamp' => $record['datetime']->format(\DateTime::ATOM),
 				'fields' => $fields,
 				'footer' => [
